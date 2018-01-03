@@ -8,3 +8,4 @@ Code to use RFM69-Modules with the Raspberry Pi
 * [RFM69HCW Hookup Guide](https://learn.sparkfun.com/tutorials/rfm69hcw-hookup-guide)
 * [OOKLONE: a cheap RF 433.92MHz OOK frame cloner](https://www.embeddedrelated.com/showarticle/626.php)
 * [Fritzing part of the ISM band transceiver HopeRF RFM69HCW](http://forum.fritzing.org/t/hoperf-rfm69hcw-ism-transceiver/1238)
+* [A super simple “RasPi RF” setup](https://jeelabs.org/book/1521a/)

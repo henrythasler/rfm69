@@ -13,21 +13,20 @@ class Rfm69(object):
     """RFM69-Class"""
     # pylint: disable=too-many-instance-attributes, C0301, C0103
 
-    def __init__(self, debug_level=0):
+    def __init__(self, channel=0, baudrate=10000000, debug_level=0):
         # general variables
         self.debug_level = debug_level
 
         # RFM69-specific variables
-        self.handle = None
         self.pi = gpio.pi()
+        self.handle = self.pi.spi_open(channel, baudrate, 0)    # Flags: CPOL=0 and CPHA=0
 
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
         """clean up stuff"""
-        if self.handle:
-            self.pi.spi_close(self.handle)
+        self.pi.spi_close(self.handle)
         self.pi.stop()
 
     def debug(self, message, level=0):
@@ -35,18 +34,23 @@ class Rfm69(object):
         if self.debug_level >= level:
             print message
 
-    def open(self, channel=0, baudrate=10000000):
-        """Open SPI interface"""
-        self.handle = self.pi.spi_open(channel, baudrate, 0)    # Flags: CPOL=0 and CPHA=0
-
-    def read_register(self, address):
-        """Read register via spi"""
+    def read_single(self, address):
+        """Read single register via spi"""
         (count, data) = self.pi.spi_xfer(self.handle, [address, 0x00])
-        if count == 2:
-            return data[1::]
-        return None
+        return data[1]
 
-    def write_register(self, address, value):
-        """Write register via spi"""
+    def write_single(self, address, value):
+        """Write single register via spi"""
         (count, data) = self.pi.spi_xfer(self.handle, [address & 0x80, value])
         return count == 2
+
+    def write_burst(self, address, data):
+        """Write bytearray of data beginning at address"""
+        (count, data) = self.pi.spi_xfer(self.handle, [address | 0x80] + data)
+        return count == (len(data)+1)
+
+    def write_config(self, cfg):
+        """Write cfg-tuble like this: ((register1, value1), (register2, value2), ...)"""
+        for i in range(0, len(cfg)):
+            reg, val = cfg[i]
+            self.write_single(reg, val)
