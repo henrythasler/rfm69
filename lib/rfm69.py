@@ -13,12 +13,12 @@ class Rfm69(object):
     """RFM69-Class"""
     # pylint: disable=too-many-instance-attributes, C0301, C0103
 
-    def __init__(self, channel=0, baudrate=10000000, debug_level=0):
+    def __init__(self, host="localhost", port=8888, channel=0, baudrate=10000000, debug_level=0):
         # general variables
         self.debug_level = debug_level
 
         # RFM69-specific variables
-        self.pi = gpio.pi()
+        self.pi = gpio.pi(host, port)
         self.handle = self.pi.spi_open(channel, baudrate, 0)    # Flags: CPOL=0 and CPHA=0
 
     def __enter__(self):
@@ -36,12 +36,12 @@ class Rfm69(object):
 
     def read_single(self, address):
         """Read single register via spi"""
-        (count, data) = self.pi.spi_xfer(self.handle, [address, 0x00])
+        (count, data) = self.pi.spi_xfer(self.handle, [address & 0x7F, 0x00])
         return data[1]
 
     def write_single(self, address, value):
         """Write single register via spi"""
-        (count, data) = self.pi.spi_xfer(self.handle, [address & 0x80, value])
+        (count, data) = self.pi.spi_xfer(self.handle, [address | 0x80, value])
         return count == 2
 
     def write_burst(self, address, data):
