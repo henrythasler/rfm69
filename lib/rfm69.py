@@ -26,7 +26,8 @@ class Rfm69(object):
 
     def __exit__(self, exc_type, exc_value, traceback):
         """clean up stuff"""
-        self.pi.spi_close(self.handle)
+        if self.handle:
+            self.pi.spi_close(self.handle)
         self.pi.stop()
 
     def debug(self, message, level=0):
@@ -44,13 +45,4 @@ class Rfm69(object):
         (count, data) = self.pi.spi_xfer(self.handle, [address | 0x80, value])
         return count == 2
 
-    def write_burst(self, address, data):
-        """Write bytearray of data beginning at address"""
-        (count, data) = self.pi.spi_xfer(self.handle, [address | 0x80] + data)
-        return count == (len(data)+1)
-
-    def write_config(self, cfg):
-        """Write cfg-tuble like this: ((register1, value1), (register2, value2), ...)"""
-        for i in range(0, len(cfg)):
-            reg, val = cfg[i]
-            self.write_single(reg, val)
+    def 
